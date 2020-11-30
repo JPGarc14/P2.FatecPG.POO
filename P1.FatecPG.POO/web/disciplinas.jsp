@@ -2,16 +2,43 @@
 <%@page import="p1.poo.fatecpg.ads.noite.Disciplinas" %>
 
 <%
-    Disciplinas listaDisciplinas = null;
-    try{
-        listaDisciplinas = (Disciplinas) application.getAttribute("listaDisciplinas");
-    }catch (Exception e){
+    String exceptionMessage = null;
+    if(request.getParameter ("Cancelar") != null){
+        response.sendRedirect(request.getRequestURI());
     }
-    if(request.getParameter ("alterar") != null){
-        int i = Integer.parseInt(request.getParameter ("i"));
-        float nota = Float.parseFloat(request.getParameter ("nota"));
-        listaDisciplinas.getList().get(i).setNota(nota);
-        response.sendRedirect(request.getContextPath()+"/disciplinas.jsp");
+    if(request.getParameter ("formInsert") != null){
+        String nome = request.getParameter("nome");
+        String ementa = request.getParameter("ementa");
+        int ciclo = Integer.parseInt(request.getParameter("ciclo"));
+        double nota = Double.parseDouble(request.getParameter("nota"));
+        try{
+            Disciplinas.Insert(nome, ementa, ciclo, nota);
+            response.sendRedirect(request.getRequestURI());
+        }catch(Exception ex){
+            exceptionMessage = ex.getLocalizedMessage();
+        }
+    }
+    if(request.getParameter ("formUpdate") != null){
+        String nomeOld = request.getParameter("nomeOld");
+        String nome = request.getParameter("nome");
+        String ementa = request.getParameter("ementa");
+        int ciclo = Integer.parseInt(request.getParameter("ciclo"));
+        double nota = Double.parseDouble(request.getParameter("nota"));
+        try{
+            Disciplinas.Update(nomeOld, nome, ementa, ciclo, nota);
+            response.sendRedirect(request.getRequestURI());
+        }catch(Exception ex){
+            exceptionMessage = ex.getLocalizedMessage();
+        }
+    }
+    if(request.getParameter ("formDelete") != null){
+        String nome = request.getParameter("nome");
+        try{
+            Disciplinas.Delete(nome);
+            response.sendRedirect(request.getRequestURI());
+        }catch(Exception ex){
+            exceptionMessage = ex.getLocalizedMessage();
+        }
     }
 %>
 <!DOCTYPE html>
@@ -23,6 +50,67 @@
     <body>
         <%@include file="WEB-INF/jspf/menu.jspf"%>
         <h1>Disciplinas</h1>
+        <%if(request.getParameter("prepInsert") != null) {%>
+        <h3>Inserir Disciplina</h3>
+        <form method="post">
+            Nome: <input type="text" name="nome">
+            Ementa: <input type="text" name="ementa">
+            Ciclo: <select name="ciclo">
+                <option>1</option>
+                <option>2</option>
+                <option>3</option>
+                <option>4</option>
+                <option>5</option>
+                <option>6</option>
+                </select>
+            Nota: <input type="text" name="nota">
+            <input type="submit" name="formInsert" value="Inserir"/>
+            <input type="submit" name="cancelar" value="Cancelar"/>
+        </form>
+        
+        <%}else if(request.getParameter("prepUpdate") != null) {%>
+        <%
+            String nome = request.getParameter("nome");
+            String ementa = request.getParameter("ementa");
+            String ciclo = request.getParameter("ciclo");
+            String nota = request.getParameter("nota");
+        %>
+        <h3>Atualizar Disciplina</h3>
+        <form method="post">
+            <input type="hidden" name="nomeOld" value="<%= nome%>">
+            Nome: <input type="text" value="<%= nome%>">
+            Ementa: <input type="text" name="ementa" value="<%= ementa%>">
+            Ciclo: <select name="ciclo">
+                <option>1</option>
+                <option>2</option>
+                <option>3</option>
+                <option>4</option>
+                <option>5</option>
+                <option>6</option>
+                </select>
+            Nota: <input type="text" name="nota" value="<%= nota%>">
+            <input type="submit" name="formUpdate" value="Atualizar"/>
+            <input type="submit" name="cancelar" value="Cancelar"/>
+        </form>
+        
+        <%}else if(request.getParameter("prepDelete") != null) {%>
+        <%
+            String nome = request.getParameter("nome");
+        %>
+        <h3>Deletar Disciplina</h3>
+        <form method="post">
+            <input type="hidden" name="nome" value="<%= nome%>">
+            Deseja deletar a disciplina: <b><%= nome%></b>
+            <input type="submit" name="formUpdate" value="Atualizar"/>
+            <input type="submit" name="cancelar" value="Cancelar"/>
+        </form>
+        
+        <%}else{%>
+        <form method="post">
+            <input type="submit" name="prepInsert" value="Inserir">
+        </form>
+        
+        <%}%>
         <table border ="i">
             <thead>
                 <tr>
